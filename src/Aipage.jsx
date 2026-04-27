@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import Avatar from "./Avatar";
 import { v4 as uuidv4 } from "uuid";
+import ReactMarkdown from "react-markdown";
 
 // Get or create a persistent device ID
 const getDeviceId = () => {
@@ -101,9 +102,28 @@ function Aipage() {
       });
 
       const data = await res.json();
-      const finalMessages = [...newMessages, { text: data.reply, sender: "ai" }];
-      setMessages(finalMessages);
-      saveChatToHistory(sessionId, finalMessages);
+const fullReply = data.reply;
+
+// Add empty AI message first
+const aiMessage = { text: "", sender: "ai" };
+setMessages([...newMessages, aiMessage]);
+
+// Type out the response word by word
+const words = fullReply.split(" ");
+let current = "";
+for (let i = 0; i < words.length; i++) {
+  current += (i === 0 ? "" : " ") + words[i];
+  const typed = current;
+  setMessages(prev => {
+    const updated = [...prev];
+    updated[updated.length - 1] = { text: typed, sender: "ai" };
+    return updated;
+  });
+  await new Promise(r => setTimeout(r, 30));
+}
+
+const finalMessages = [...newMessages, { text: fullReply, sender: "ai" }];
+saveChatToHistory(sessionId, finalMessages);
     } catch (error) {
       const finalMessages = [...newMessages, { text: "Oops! Something went wrong. Try again!", sender: "ai" }];
       setMessages(finalMessages);
@@ -215,19 +235,47 @@ function Aipage() {
 
           {/* MESSAGES */}
           {messages.map((msg, index) => (
-            <div
-              key={index}
-              className={`max-w-xs px-4 py-2 rounded-lg ${
-                msg.sender === "user" ? "bg-blue-600 ml-auto" : "bg-gray-700"
-              }`}
-            >
-              {msg.text}
-            </div>
-          ))}
+  <div
+    key={index}
+    className={`max-w-sm px-4 py-2 rounded-lg ${
+      msg.sender === "user"
+        ? "bg-blue-600 ml-auto text-white"
+        : "bg-gray-700 text-white"
+    }`}
+  >
+    {msg.sender === "user" ? (
+      msg.text
+    ) : (
+      <ReactMarkdown
+        components={{
+          p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+          strong: ({ children }) => <strong className="font-bold text-blue-300">{children}</strong>,
+          em: ({ children }) => <em className="italic text-gray-300">{children}</em>,
+          ul: ({ children }) => <ul className="list-disc list-inside mb-2 space-y-1">{children}</ul>,
+          ol: ({ children }) => <ol className="list-decimal list-inside mb-2 space-y-1">{children}</ol>,
+          li: ({ children }) => <li className="text-sm">{children}</li>,
+          code: ({ inline, children }) =>
+            inline ? (
+              <code className="bg-gray-900 text-green-400 px-1 rounded text-xs">{children}</code>
+            ) : (
+              <pre className="bg-gray-900 text-green-400 p-2 rounded text-xs overflow-x-auto mt-1 mb-2">
+                <code>{children}</code>
+              </pre>
+            ),
+          h1: ({ children }) => <h1 className="text-lg font-bold mb-2 text-white">{children}</h1>,
+          h2: ({ children }) => <h2 className="text-base font-bold mb-1 text-white">{children}</h2>,
+          h3: ({ children }) => <h3 className="text-sm font-bold mb-1 text-white">{children}</h3>,
+        }}
+      >
+        {msg.text}
+      </ReactMarkdown>
+    )}
+  </div>
+))}
 
           {loading && (
             <div className="bg-gray-700 max-w-xs px-4 py-2 rounded-lg animate-pulse">
-              Thinking... 🤔
+              Thinking... 
             </div>
           )}
           <div ref={bottomRef} />
