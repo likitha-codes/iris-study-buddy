@@ -112,4 +112,16 @@ app.delete("/api/chats/:sessionId", async (req, res) => {
   }
 });
 
+app.get("/ping", (req, res) => res.send("awake"));
+
+// Keep alive — ping every 14 minutes so free tier never sleeps
+import https from "https";
+setInterval(() => {
+  https.get("https://iris-ai-backend-onka.onrender.com/ping", (res) => {
+    console.log("Ping sent, status:", res.statusCode);
+  }).on("error", (e) => {
+    console.log("Ping error:", e.message);
+  });
+}, 14 * 60 * 1000);
+
 app.listen(5000, () => console.log("Server running on port 5000"));
