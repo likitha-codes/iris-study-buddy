@@ -139,7 +139,7 @@ saveChatToHistory(sessionId, finalMessages);
   };
 
   return (
-    <div className="flex h-screen bg-slate-900 text-white overflow-hidden">
+    <div className="flex h-screen w-screen bg-slate-900 text-white overflow-hidden">
 
       {/* CHAT HISTORY SIDEBAR */}
       <div className={`fixed inset-y-0 left-0 z-50 w-72 bg-slate-800 border-r border-gray-700 flex flex-col transform transition-transform duration-300 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
@@ -196,12 +196,12 @@ saveChatToHistory(sessionId, finalMessages);
       )}
 
       {/* LEFT SIDE → AVATAR */}
-      <div className="w-1/3 border-r border-gray-700 flex items-center justify-center">
+<div className="w-1/4 border-r border-gray-700 flex items-center justify-center bg-slate-900">
         <Avatar isThinking={loading} />
       </div>
 
       {/* RIGHT SIDE → CHAT */}
-      <div className="w-2/3 flex flex-col">
+      <div className="flex-1 flex flex-col overflow-hidden">
 
         {/* HEADER */}
         <div className="p-4 border-b border-gray-700 flex items-center gap-3">
@@ -237,11 +237,12 @@ saveChatToHistory(sessionId, finalMessages);
           {messages.map((msg, index) => (
   <div
     key={index}
-    className={`max-w-sm px-4 py-2 rounded-lg ${
+    className={`max-w-2xl px-4 py-3 rounded-lg ${
       msg.sender === "user"
         ? "bg-blue-600 ml-auto text-white"
         : "bg-gray-700 text-white"
     }`}
+  
   >
     {msg.sender === "user" ? (
       msg.text
